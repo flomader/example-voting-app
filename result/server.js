@@ -1,6 +1,5 @@
 var express = require('express'),
-    async = require('async'),
-    pg = require("pg"),
+    mssql = require('tedious'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
     methodOverride = require('method-override'),
@@ -21,46 +20,81 @@ io.sockets.on('connection', function (socket) {
   });
 });
 
-async.retry(
-  {times: 1000, interval: 1000},
-  function(callback) {
-    pg.connect('postgres://postgres@db/postgres', function(err, client, done) {
+//Use setInterval to retry the connection the SQL Server until it connects to allow time for the SQL Server container to come up
+var connectionAttempts = 1;
+var connected = false;
+console.log("Attempting connection...");
+setInterval(function () {
+  if(!connected) {
+    var Connection = mssql.Connection;
+    var config = {
+        userName: process.env.DB_USER
+        ,password: process.env.DB_PASSWORD
+        ,server: process.env.DB_HOST
+        ,options: { database:process.env.DB_NAME }
+        /* Uncomment if you need to debug connections/queries
+        ,debug:
+          {
+          packet: false,
+          data: false,
+          payload: false,
+          token: false,
+          log: false
+          }*/
+        };
+    var connection = new Connection(config);
+    console.log("Connection attempt: " + connectionAttempts);
+    connectionAttempts++;
+    /* Uncomment if you need to debug connections/queries
+    connection.on('infoMessage', infoError);
+    connection.on('errorMessage', infoError);
+    connection.on('debug', debug);
+    */
+    connection.on('connect', function(err) {
       if (err) {
-        console.error("Waiting for db");
+        console.log(err);
+        connected = false;
+      } else {
+        connected = true;
+        console.log("Connected");
+        setInterval(function() { getVotes(connection); }, 1000);
       }
-      callback(err, client);
     });
-  },
-  function(err, client) {
-    if (err) {
-      return console.err("Giving up");
-    }
-    console.log("Connected to db");
-    getVotes(client);
   }
-);
-
-function getVotes(client) {
-  client.query('SELECT vote, COUNT(id) AS count FROM votes GROUP BY vote', [], function(err, result) {
-    if (err) {
-      console.error("Error performing query: " + err);
-    } else {
-      var votes = collectVotesFromResult(result);
-      io.sockets.emit("scores", JSON.stringify(votes));
-    }
-
-    setTimeout(function() {getVotes(client) }, 1000);
-  });
 }
+, 10000);
 
-function collectVotesFromResult(result) {
-  var votes = {a: 0, b: 0};
+/* Uncomment if you need to debug connections/queries
+function infoError(info) {
+  var dd = info;
+  console.log('infoError=> ' + info);
+}
+function debug(message) {
+  var dd = message;
+  console.log('debug=> ' + message);
+}
+*/
 
-  result.rows.forEach(function (row) {
-    votes[row.vote] = parseInt(row.count);
+function getVotes(connection) {
+  console.log("Getting Votes...");
+  var Request = require('tedious').Request;
+  request = new Request("SELECT (SELECT COUNT(*) FROM votes WHERE vote = 'a') AS 'a', (SELECT COUNT(*) FROM votes WHERE vote = 'b') AS 'b' FOR JSON PATH, WITHOUT_ARRAY_WRAPPER;", function(err, rowCount) {
+    if (err) {
+      console.log(err);
+    }
+  });
+  
+  request.on('row', function(columns) { 
+    columns.forEach(function(column) {  
+      if (column.value === null) {  
+        console.log('NULL');
+      } else {  
+        io.sockets.emit("scores",column.value);
+      }  
+    });
   });
 
-  return votes;
+  connection.execSql(request);  
 }
 
 app.use(cookieParser());
