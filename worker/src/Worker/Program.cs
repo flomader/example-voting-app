@@ -1,11 +1,11 @@
 using System;
 using System.Data.Common;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using Newtonsoft.Json;
-using Npgsql;
 using StackExchange.Redis;
 
 namespace Worker
@@ -14,9 +14,14 @@ namespace Worker
     {
         public static int Main(string[] args)
         {
+            var host = Environment.GetEnvironmentVariable("DB_HOST");
+            var db = Environment.GetEnvironmentVariable("DB_NAME");
+            var user = Environment.GetEnvironmentVariable("DB_USER"); 
+            var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
+
             try
             {
-                var pgsql = OpenDbConnection("Server=db;Username=postgres;");
+                var conn = OpenDbConnection($"Initial Catalog={db};Data Source={host};Integrated Security=false;User ID={user};Password={password}");
                 var redis = OpenRedisConnection("redis").GetDatabase();
 
                 var definition = new { vote = "", voter_id = "" };
@@ -27,7 +32,7 @@ namespace Worker
                     {
                         var vote = JsonConvert.DeserializeAnonymousType(json, definition);
                         Console.WriteLine($"Processing vote for '{vote.vote}' by '{vote.voter_id}'");
-                        UpdateVote(pgsql, vote.voter_id, vote.vote);
+                        UpdateVote(conn, vote.voter_id, vote.vote);
                     }
                 }
             }
@@ -38,15 +43,15 @@ namespace Worker
             }
         }
 
-        private static NpgsqlConnection OpenDbConnection(string connectionString)
+        private static SqlConnection OpenDbConnection(string connectionString)
         {
-            NpgsqlConnection connection;
+            SqlConnection connection;
 
             while (true)
             {
                 try
                 {
-                    connection = new NpgsqlConnection(connectionString);
+                    connection = new SqlConnection(connectionString);
                     connection.Open();
                     break;
                 }
@@ -65,10 +70,10 @@ namespace Worker
             Console.Error.WriteLine("Connected to db");
 
             var command = connection.CreateCommand();
-            command.CommandText = @"CREATE TABLE IF NOT EXISTS votes (
-                                        id VARCHAR(255) NOT NULL UNIQUE, 
-                                        vote VARCHAR(255) NOT NULL
-                                    )";
+            command.CommandText = @"IF(NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'votes'))
+                                    BEGIN
+                                        CREATE TABLE votes(id VARCHAR(255) NOT NULL UNIQUE,vote VARCHAR(255) NOT NULL)
+                                    END";
             command.ExecuteNonQuery();
 
             return connection;
@@ -102,7 +107,7 @@ namespace Worker
                 .First(a => a.AddressFamily == AddressFamily.InterNetwork)
                 .ToString();
 
-        private static void UpdateVote(NpgsqlConnection connection, string voterId, string vote)
+        private static void UpdateVote(SqlConnection connection, string voterId, string vote)
         {
             var command = connection.CreateCommand();
             try
