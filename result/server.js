@@ -31,7 +31,10 @@ setInterval(function () {
         userName: process.env.DB_USER
         ,password: process.env.DB_PASSWORD
         ,server: process.env.DB_HOST
-        ,options: { database:process.env.DB_NAME }
+        ,options: { 
+          database:process.env.DB_NAME,
+          encrypt: true
+        }
         /* Uncomment if you need to debug connections/queries
         ,debug:
           {

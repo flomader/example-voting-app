@@ -21,7 +21,7 @@ namespace Worker
 
             try
             {
-                var conn = OpenDbConnection($"Initial Catalog={db};Data Source={host};Integrated Security=false;User ID={user};Password={password}");
+                var conn = OpenDbConnection($"Server=tcp:{host},1433;Initial Catalog=Votes;Persist Security Info=False;User ID={user};Password={password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
                 var redis = OpenRedisConnection("redis").GetDatabase();
 
                 var definition = new { vote = "", voter_id = "" };
