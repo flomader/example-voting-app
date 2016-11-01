@@ -61,12 +61,6 @@ services:
     networks:
       - back-tier
 
-volumes:
-  db-data:
-    driver: azurefile
-    driver_opts:
-      share: "votes"
-
 networks:
   front-tier:
   back-tier:
