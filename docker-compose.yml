@@ -51,8 +51,6 @@ services:
   db:
     image: private-repo.microsoft.com/mssql-private-preview/mssql-server
     container_name: db
-    volumes:
-      - "db-data:/var/opt/mssql/data"
     ports:
       - "1433:1433"
     environment:
