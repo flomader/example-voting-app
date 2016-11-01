@@ -6,6 +6,11 @@ services:
     command: python app.py
     ports:
       - "50000:80"
+    environment:
+      #REDIS_HOST: "votes.redis.cache.windows.net"
+      #REDIS_KEY: "I+7ZwyYT5q8Kk6DsoKUAgs+asKyIo0/SJDbW2Rs8E/g="
+      REDIS_HOST: "redis"
+      REDIS_KEY: "redis"
     networks:
       - front-tier
       - back-tier
@@ -32,11 +37,16 @@ services:
       DB_USER: "sa"
       DB_PASSWORD: "sa"
       DB_NAME: "Votes"
+      #REDIS_HOST: "votes.redis.cache.windows.net"
+      #REDIS_KEY: "I+7ZwyYT5q8Kk6DsoKUAgs+asKyIo0/SJDbW2Rs8E/g="
+      REDIS_HOST: "redis"
+      REDIS_KEY: "redis"
     networks:
       - back-tier
 
   redis:
     image: redis:alpine
+    command: redis-server --requirepass redis
     container_name: redis
     ports: ["6379"]
     networks:

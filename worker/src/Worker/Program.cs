@@ -22,7 +22,8 @@ namespace Worker
             try
             {
                 var conn = OpenDbConnection($"Server=tcp:{host},1433;Initial Catalog=Votes;Persist Security Info=False;User ID={user};Password={password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
-                var redis = OpenRedisConnection("redis").GetDatabase();
+                var redis = OpenRedisConnection(Environment.GetEnvironmentVariable("REDIS_HOST"),
+                                                Environment.GetEnvironmentVariable("REDIS_KEY")).GetDatabase();
 
                 var definition = new { vote = "", voter_id = "" };
                 while (true)
@@ -79,9 +80,9 @@ namespace Worker
             return connection;
         }
 
-        private static ConnectionMultiplexer OpenRedisConnection(string hostname)
+        private static ConnectionMultiplexer OpenRedisConnection(string hostname, string key)
         {
-            // Use IP address to workaround hhttps://github.com/StackExchange/StackExchange.Redis/issues/410
+            // Use IP address to workaround https://github.com/StackExchange/StackExchange.Redis/issues/410
             var ipAddress = GetIp(hostname);
             Console.WriteLine($"Found redis at {ipAddress}");
 
@@ -89,8 +90,8 @@ namespace Worker
             {
                 try
                 {
-                    Console.Error.WriteLine("Connected to redis");
-                    return ConnectionMultiplexer.Connect(ipAddress);
+                    Console.Error.WriteLine("Connecting to redis");
+                    return ConnectionMultiplexer.Connect($"{ipAddress},ssl=false,password={key}");
                 }
                 catch (RedisConnectionException)
                 {
