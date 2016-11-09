@@ -22,7 +22,7 @@ services:
     environment:
       DB_HOST: "db"
       DB_USER: "sa"
-      DB_PASSWORD: "sa"
+      DB_PASSWORD: "P@ssw0rd"
       DB_NAME: "Votes"
     networks:
       - front-tier
@@ -33,7 +33,7 @@ services:
     environment:
       DB_HOST: "db"
       DB_USER: "sa"
-      DB_PASSWORD: "sa"
+      DB_PASSWORD: "P@ssw0rd"
       DB_NAME: "Votes"
       REDIS_HOST: "redis"
       REDIS_KEY: "redis"
@@ -53,6 +53,8 @@ services:
     container_name: db
     ports:
       - "1433:1433"
+    volumes:
+      - /e/mssql/data:/var/opt/mssql
     environment:
       SA_PASSWORD: "sa"
       ACCEPT_EULA: "Y"
