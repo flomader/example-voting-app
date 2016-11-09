@@ -5,7 +5,7 @@ services:
     build: ./vote
     command: python app.py
     ports:
-      - "50000:80"
+      - "8000:80"
     environment:
       REDIS_HOST: "redis"
       REDIS_KEY: "redis"
@@ -17,7 +17,7 @@ services:
     build: ./result
     command: nodemon --debug server.js
     ports:
-      - "50001:80"
+      - "8001:80"
       - "5858:5858"
     environment:
       DB_HOST: "db"
