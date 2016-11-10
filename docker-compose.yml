@@ -2,7 +2,10 @@ version: "2"
 
 services:
   vote:
-    build: ./vote
+    image: vote
+    build: 
+      context: ./vote
+      dockerfile: Dockerfile
     command: python app.py
     ports:
       - "8000:80"
@@ -14,7 +17,10 @@ services:
       - back-tier
 
   result:
-    build: ./result
+    image: result
+    build: 
+      context: ./result
+      dockerfile: Dockerfile
     command: nodemon --debug server.js
     ports:
       - "8888:80"
@@ -29,7 +35,10 @@ services:
       - back-tier
 
   worker:
-    build: ./worker
+    image: worker
+    build: 
+      context: ./worker
+      dockerfile: Dockerfile
     environment:
       DB_HOST: "db"
       DB_USER: "sa"
