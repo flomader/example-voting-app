@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:1.0.1-runtime
+FROM microsoft/dotnet:1.0.1-sdk-projectjson
 
 WORKDIR /app
 
