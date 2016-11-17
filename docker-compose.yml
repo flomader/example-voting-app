@@ -2,7 +2,7 @@ version: "2"
 
 services:
   vote:
-    image: vote
+    image: docker-on.azurecr.io/vote
     build: 
       context: ./vote
       dockerfile: Dockerfile
@@ -17,7 +17,7 @@ services:
       - back-tier
 
   result:
-    image: result
+    image: docker-on.azurecr.io/result
     build: 
       context: ./result
       dockerfile: Dockerfile
@@ -35,7 +35,7 @@ services:
       - back-tier
 
   worker:
-    image: worker
+    image: docker-on.azurecr.io/worker
     build: 
       context: ./worker
       dockerfile: Dockerfile
