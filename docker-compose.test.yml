@@ -1,0 +1,73 @@
+version: "2"
+
+services:
+  vote:
+    image: docker-on.azurecr.io/vote
+    build: 
+      context: ./vote
+      dockerfile: Dockerfile
+    command: python app.py
+    ports:
+      - "8000:80"
+    environment:
+      REDIS_HOST: "redis"
+      REDIS_KEY: "redis"
+    networks:
+      - front-tier
+      - back-tier
+
+  result:
+    image: docker-on.azurecr.io/result
+    build: 
+      context: ./result
+      dockerfile: Dockerfile
+    command: nodemon --debug server.js
+    ports:
+      - "8888:80"
+      - "5858:5858"
+    environment:
+      DB_HOST: "db"
+      DB_USER: "sa"
+      DB_PASSWORD: "sa"
+      DB_NAME: "Votes"
+    networks:
+      - front-tier
+      - back-tier
+
+  worker:
+    image: docker-on.azurecr.io/worker
+    build: 
+      context: ./worker
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: "db"
+      DB_USER: "sa"
+      DB_PASSWORD: "sa"
+      DB_NAME: "Votes"
+      REDIS_HOST: "redis"
+      REDIS_KEY: "redis"
+    networks:
+      - back-tier
+
+  redis:
+    image: redis:alpine
+    command: redis-server --requirepass redis
+    container_name: redis
+    ports: ["6379"]
+    networks:
+      - back-tier
+
+  db:
+    image: microsoft/mssql-server-linux
+    container_name: db
+    ports:
+      - "1433:1433"
+    environment:
+      SA_PASSWORD: "sa"
+      ACCEPT_EULA: "Y"
+    networks:
+      - back-tier
+
+networks:
+  front-tier:
+  back-tier:
