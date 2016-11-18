@@ -58,7 +58,7 @@ services:
       - back-tier
 
   db:
-    image: private-repo.microsoft.com/mssql-private-preview/mssql-server
+    image: microsoft/mssql-server-linux
     container_name: db
     ports:
       - "1433:1433"
