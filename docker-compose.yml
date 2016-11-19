@@ -6,6 +6,8 @@ services:
     build: 
       context: ./vote
       dockerfile: Dockerfile
+    depends_on:
+      - "redis"
     command: python app.py
     ports:
       - "8000:80"
@@ -21,6 +23,8 @@ services:
     build: 
       context: ./result
       dockerfile: Dockerfile
+    depends_on:
+      - "db"
     command: nodemon --debug server.js
     ports:
       - "8888:80"
@@ -39,6 +43,9 @@ services:
     build: 
       context: ./worker
       dockerfile: Dockerfile
+    depends_on:
+      - "db"
+      - "redis"
     environment:
       DB_HOST: "db"
       DB_USER: "sa"
@@ -62,8 +69,9 @@ services:
     container_name: db
     ports:
       - "1433:1433"
-    volumes:
-      - /e/mssql/data:/var/opt/mssql
+      volumes:
+      - /Users/Florian/mssql:/var/opt/mssql
+      #Windows:/e/mssql:/var/opt/mssql
     environment:
       SA_PASSWORD: "P@ssw0rd"
       ACCEPT_EULA: "Y"
