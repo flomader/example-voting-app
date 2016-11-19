@@ -1,0 +1,1 @@
+CREATE TABLE dbo.votes(id VARCHAR(255), vote VARCHAR(255))

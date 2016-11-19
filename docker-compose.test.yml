@@ -6,6 +6,8 @@ services:
     build: 
       context: ./vote
       dockerfile: Dockerfile
+    depends_on:
+      - "redis"
     command: python app.py
     ports:
       - "8000:80"
@@ -21,6 +23,8 @@ services:
     build: 
       context: ./result
       dockerfile: Dockerfile
+    depends_on:
+      - "db"
     command: nodemon --debug server.js
     ports:
       - "8888:80"
@@ -28,7 +32,7 @@ services:
     environment:
       DB_HOST: "db"
       DB_USER: "sa"
-      DB_PASSWORD: "sa"
+      DB_PASSWORD: "P@ssw0rd"
       DB_NAME: "Votes"
     networks:
       - front-tier
@@ -39,10 +43,13 @@ services:
     build: 
       context: ./worker
       dockerfile: Dockerfile
+    depends_on:
+      - "db"
+      - "redis"
     environment:
       DB_HOST: "db"
       DB_USER: "sa"
-      DB_PASSWORD: "sa"
+      DB_PASSWORD: "P@ssw0rd"
       DB_NAME: "Votes"
       REDIS_HOST: "redis"
       REDIS_KEY: "redis"
@@ -63,10 +70,12 @@ services:
     ports:
       - "1433:1433"
     environment:
-      SA_PASSWORD: "sa"
+      SA_PASSWORD: "P@ssw0rd"
       ACCEPT_EULA: "Y"
     networks:
       - back-tier
+    volumes:
+      - /mssql:/var/opt/mssql
 
 networks:
   front-tier:
