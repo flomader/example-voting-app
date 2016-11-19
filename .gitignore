@@ -4,3 +4,4 @@ bin/
 obj/
 *.prod.yml
 *.dab
+.DS_Store
