@@ -4,10 +4,9 @@ import os
 import socket
 import random
 import json
-import emoji
 
-option_a = os.getenv('OPTION_A', emoji.emojize(':cat_face: ') + "Cats")
-option_b = os.getenv('OPTION_B', emoji.emojize(':dog_face: ') + "Dogs")
+option_a = os.getenv('OPTION_A', "Cats")
+option_b = os.getenv('OPTION_B', "Dogs")
 hostname = socket.gethostname()
 
 app = Flask(__name__)
