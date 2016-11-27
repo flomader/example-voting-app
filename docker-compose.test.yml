@@ -65,7 +65,7 @@ services:
       - back-tier
 
   db:
-    image: microsoft/mssql-server-linux:latest
+    image: docker-on.azurecr.io/mssql-server-linux:latest
     container_name: db
     ports:
       - "1433:1433"
@@ -74,8 +74,6 @@ services:
       ACCEPT_EULA: "Y"
     networks:
       - back-tier
-    volumes:
-      - /mssql:/var/opt/mssql
 
 networks:
   front-tier:
