@@ -4,6 +4,7 @@ import os
 import socket
 import random
 import json
+import emoji
 
 option_a = os.getenv('OPTION_A', "Cats")
 option_b = os.getenv('OPTION_B', "Dogs")
@@ -32,8 +33,8 @@ def hello():
 
     resp = make_response(render_template(
         'index.html',
-        option_a=option_a,
-        option_b=option_b,
+        option_a=emoji.emojize(':cat_face: ') + option_a,
+        option_b=emoji.emojize(':dog_face: ') + option_b,
         hostname=hostname,
         vote=vote,
     ))
