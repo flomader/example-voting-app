@@ -1,0 +1,7 @@
+CREATE LOGIN Worker
+	WITH PASSWORD = 'P@ssw0rd' 
+GO
+
+CREATE LOGIN Result
+	WITH PASSWORD = 'P@ssw0rd' 
+GO
