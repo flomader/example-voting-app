@@ -1,1 +1,7 @@
-CREATE TABLE dbo.votes(id VARCHAR(255), vote VARCHAR(255))
+CREATE TABLE [dbo].[votes](
+	[id] [varchar](255) NOT NULL,
+	[vote] [varchar](255) NOT NULL,
+UNIQUE NONCLUSTERED 
+(
+    [id] ASC
+)
